@@ -10,21 +10,22 @@ module.exports = {
 
   'Checks vertical icons panelcontex menu': function (browser: NightwatchBrowser) {
     browser.waitForElementVisible('div[data-id="remixIdeIconPanel"]', 10000)
-    .waitForElementVisible('*[data-id="pluginManagerComponentPluginManager"]')
-    .click('*[data-id="pluginManagerComponentPluginManager"]')
+    .waitForElementVisible('*[data-id="verticalIconsKindpluginManager"]')
+    .click('*[data-id="verticalIconsKindpluginManager"]')
     .scrollAndClick('*[data-id="pluginManagerComponentActivateButtondebugger"]')
     .waitForElementVisible('*[data-id="pluginManagerComponentDeactivateButtondebugger"]', 7000)
-    .rightClick('[data-path="verticalIconsDebuggingIcons"]')
+    .rightClick('[data-id="verticalIconsKinddebugger"]')
     .waitForElementVisible('*[id="menuitemdeactivate"]')
     .waitForElementVisible('*[id="menuitemdocumentation"]')
   },
 
   'Checks vertical icons panel contex menu deactivate': function (browser: NightwatchBrowser) {
-    browser.waitForElementVisible('*[data-id="pluginManagerComponentPluginManager"]')
-    .click('*[data-id="pluginManagerComponentPluginManager"]')
+    browser.waitForElementVisible('*[data-id="verticalIconsKindpluginManager"]')
+    .click('*[data-id="verticalIconsKindsettingsr"]')
+    .click('*[data-id="verticalIconsKindpluginManager"]')
     .scrollAndClick('*[data-id="pluginManagerComponentActivateButtondebugger"]')
     .waitForElementVisible('*[data-id="pluginManagerComponentDeactivateButtondebugger"]', 7000)
-    .rightClick('[data-path="verticalIconsDebuggingIcons"]')
+    .rightClick('[data-id="verticalIconsKinddebugger"]')
     .click('*[id="menuitemdeactivate"]')
     .click('*[data-id="pluginManagerComponentPluginManager"]')
     .waitForElementVisible('*[data-id="pluginManagerComponentActivateButtondebugger"]')
