@@ -64,7 +64,7 @@ export class VerticalIcons extends Plugin {
    * Add an icon to the map
    * @param {ModuleProfile} profile The profile of the module
    */
-  addIcon ({ kind, name, icon, displayName, tooltip, documentation}) {
+  addIcon ({ kind, name, icon, displayName, tooltip, documentation }) {
     let title = (tooltip || displayName || name)
     title = title.replace(/^\w/, c => c.toUpperCase())
     this.icons[name] = yo`
@@ -226,14 +226,14 @@ export class VerticalIcons extends Plugin {
   async itemContextMenu (e, name, documentation) {
     const actions = {}
     if (await this.appManager.canDeactivatePlugin(profile, { name })) {
-      actions['Deactivate'] = () => {
-        //this.call('manager', 'deactivatePlugin', name)
+      actions.Deactivate = () => {
+        // this.call('manager', 'deactivatePlugin', name)
         this.appManager.deactivatePlugin(name)
       }
     }
     const links = {}
     if (documentation) {
-      links['Documentation'] = documentation
+      links.Documentation = documentation
     }
     if (Object.keys(actions).length || Object.keys(links).length) {
       VERTICALMENU_HANDLE && VERTICALMENU_HANDLE.hide(null, true)
