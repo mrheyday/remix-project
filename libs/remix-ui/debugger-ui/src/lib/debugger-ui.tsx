@@ -204,8 +204,8 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
       })
     }).catch((error) => {
       if (JSON.stringify(error) !== '{}') {
-        let message = `Invalid input: ${JSON.stringify(error)}`
-        message = message.replaceAll(`\\"`,`'`)
+        let message = 'Error: ' + JSON.stringify(error)
+        message = message.split(`\\"`).join(`'`)
         setState(prevState => {
           return {
             ...prevState,
@@ -214,7 +214,6 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
         })
         console.log(message)
       }
-      
       unLoad()
     })
   }
