@@ -5,10 +5,11 @@ const RemixSimulator = require('@remix-project/remix-simulator')
 class VMProvider {
   constructor (executionContext) {
     this.executionContext = executionContext
-    this.RemixSimulatorProvider = new RemixSimulator.Provider({ executionContext: this.executionContext })
+    this.RemixSimulatorProvider = new RemixSimulator.Provider({})
     this.RemixSimulatorProvider.init()
     this.web3 = new Web3(this.RemixSimulatorProvider)
     this.accounts = {}
+    this.executionContext.setWeb3('vm', this.web3)
   }
 
   getAccounts (cb) {

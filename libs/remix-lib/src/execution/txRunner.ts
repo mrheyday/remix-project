@@ -92,14 +92,17 @@ export class TxRunner {
       data = '0x' + data
     }
 
+    return this.runInNode(args.from, args.to, data, args.value, args.gasLimit, args.useCall, confirmationCb, gasEstimationForceSend, promptCb, callback)
+    
+    /*
     if (!this.executionContext.isVM()) {
-      return this.runInNode(args.from, args.to, data, args.value, args.gasLimit, args.useCall, confirmationCb, gasEstimationForceSend, promptCb, callback)
-    }
+      }
     try {
       this.runInVm(args.from, args.to, data, args.value, args.gasLimit, args.useCall, args.timestamp, callback)
     } catch (e) {
       callback(e, null)
     }
+    */
   }
 
   runInVm (from, to, data, value, gasLimit, useCall, timestamp, callback) {

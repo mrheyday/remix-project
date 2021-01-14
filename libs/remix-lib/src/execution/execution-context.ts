@@ -78,17 +78,18 @@ class StateManagerCommonStorageDump extends StateManager {
 export class ExecutionContext {
   event
   logsManager
-  blockGasLimitDefault
-  blockGasLimit
+  blockGasLimitDefault: number
+  blockGasLimit: number
   customNetWorks
   blocks
   latestBlockNumber
   txs
-  executionContext
-  listenOnLastBlockId
+  executionContext: string
+  listenOnLastBlockId: boolean
   currentFork: string
   vms
   mainNetGenesisHash: string
+  customWeb3: { [key: string]: Web3 }
 
   constructor () {
     this.event = new EventManager()
@@ -111,6 +112,7 @@ export class ExecutionContext {
     this.blocks = {}
     this.latestBlockNumber = 0
     this.txs = {}
+    this.customWeb3 = {} // mapping between a context name and a web3.js instance
   }
 
   init (config) {
@@ -150,7 +152,12 @@ export class ExecutionContext {
     return this.executionContext === 'vm'
   }
 
+  setWeb3 (context: string, web3: Web3) {
+    this.customWeb3[context] = web3
+  }
+
   web3 () {
+    if (this.customWeb3[this.executionContext]) return this.customWeb3[this.executionContext]
     return this.isVM() ? this.vms[this.currentFork].web3vm : web3
   }
 
