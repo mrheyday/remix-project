@@ -5,6 +5,7 @@ import remixDebug, { TransactionDebugger as Debugger } from '@remix-project/remi
 import * as packageJson from '../../../../../package.json'
 import React from 'react' // eslint-disable-line
 import ReactDOM from 'react-dom'
+import modalDialogCustom from '../ui/modal-dialog-custom'
 const yo = require('yo-yo')
 const css = require('./styles/debugger-tab-styles')
 
@@ -116,6 +117,10 @@ class DebuggerTab extends ViewPlugin {
         resolve(web3)
       })
     })
+  }
+
+  showMessage (title, message) {
+    modalDialogCustom.alert(title, message)
   }
 
   async getTrace (hash) {

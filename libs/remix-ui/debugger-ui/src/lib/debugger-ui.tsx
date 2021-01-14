@@ -25,7 +25,9 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
     opt: {
       debugWithGeneratedSources: false
     },
-    toastMessage: ''
+    toastMessage: '',
+    validationError: '',
+    txNumberIsEmpty: true
   })
 
   useEffect(() => {
@@ -90,7 +92,9 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
               try {
                 content = await debuggerModule.getFile(path)
               } catch (e) {
-                console.log('unable to fetch generated sources, the file probably doesn\'t exist yet', e)
+                const message = 'Unable to fetch generated sources, the file probably doesn\'t exist yet.'
+                debuggerModule.showMessage('Debugging error', message)
+                console.log(message, ' ', e)
               }
               if (content !== source.contents) {
                 await debuggerModule.setFile(path, source.contents)
@@ -111,6 +115,16 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
 
   const requestDebug = (blockNumber, txNumber, tx) => {
     startDebugging(blockNumber, txNumber, tx)
+  }
+
+  const updateTxNumberFlag = (empty: boolean) => {
+    setState(prevState => {
+      return {
+        ...prevState,
+        txNumberIsEmpty: empty,
+        validationError: ''
+      }
+    })
   }
 
   const unloadRequested = (blockNumber, txIndex, tx) => {
@@ -146,7 +160,19 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
     if (state.debugger) unLoad()
     if (!txNumber) return
     const web3 = await debuggerModule.getDebugWeb3()
-    const currentReceipt = await web3.eth.getTransactionReceipt(txNumber)
+    let currentReceipt
+    try {
+      currentReceipt = await web3.eth.getTransactionReceipt(txNumber)
+    } catch (e) {
+      setState(prevState => {
+        return {
+          ...prevState,
+          validationError: e.message
+        }
+      })
+      console.log(e.message)
+    }
+
     const debuggerInstance = new Debugger({
       web3,
       offsetToLineColumnConverter: debuggerModule.offsetToLineColumnConverter,
@@ -155,6 +181,7 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
           const ret = await debuggerModule.fetchContractAndCompile(address, currentReceipt)          
           return ret
         } catch (e) {
+          debuggerModule.showMessage('Debugging error', 'Unable to fetch a transaction.')
           console.error(e)
         }
         return null
@@ -171,21 +198,34 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
           debugging: true,
           currentReceipt,
           debugger: debuggerInstance,
-          toastMessage: `debugging ${txNumber}`
+          toastMessage: `debugging ${txNumber}`,
+          validationError: ''
         }
       })
     }).catch((error) => {
-      setState(prevState => {
-        return {
-          ...prevState,
-          toastMessage: JSON.stringify(error)
-        }
-      })
+      if (JSON.stringify(error) !== '{}') {
+        let message = `Invalid input: ${JSON.stringify(error)}`
+        message = message.replaceAll(`\\"`,`'`)
+        setState(prevState => {
+          return {
+            ...prevState,
+            validationError: message
+          }
+        })
+        console.log(message)
+      }
+      
       unLoad()
     })
   }
 
 const debug = (txHash) => {
+  setState(prevState => {
+    return {
+      ...prevState,
+      validationError: ''
+    }
+  })
   startDebugging(null, txHash, null)
 }
 
@@ -216,9 +256,9 @@ const vmDebugger = {
       <div>
         <Toaster message={state.toastMessage} />
         <div className="px-2">
-          <div className="mt-3">
+          <div>
             <p className="mt-2 debuggerLabel">Debugger Configuration</p>
-            <div className="mt-2 debuggerConfig custom-control custom-checkbox">
+            <div className="my-2 debuggerConfig custom-control custom-checkbox">
               <input className="custom-control-input" id="debugGeneratedSourcesInput" onChange={({ target: { checked } }) => {
                 setState(prevState => {
                   return { ...prevState, opt: { debugWithGeneratedSources: checked }}
@@ -226,8 +266,9 @@ const vmDebugger = {
               }} type="checkbox" title="Debug with generated sources" />
               <label data-id="debugGeneratedSourcesLabel" className="form-check-label custom-control-label" htmlFor="debugGeneratedSourcesInput">Use generated sources (from Solidity v0.7.2)</label>
             </div>
+            { (state.validationError && !state.txNumberIsEmpty) && <span className="w-100 py-1 text-danger validationError">{state.validationError}</span> }
           </div>
-          <TxBrowser requestDebug={ requestDebug } unloadRequested={ unloadRequested } transactionNumber={ state.txNumber } debugging={ state.debugging } />
+          <TxBrowser requestDebug={ requestDebug } updateTxNumberFlag={ updateTxNumberFlag } unloadRequested={ unloadRequested } transactionNumber={ state.txNumber } debugging={ state.debugging } />
   { state.debugging && <StepManager stepManager={ stepManager } /> }
   { state.debugging && <VmDebuggerHead vmDebugger={ vmDebugger } /> }
         </div>

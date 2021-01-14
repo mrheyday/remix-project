@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './tx-browser.css'
 
-export const TxBrowser = ({ requestDebug, unloadRequested, transactionNumber, debugging }) => {
+export const TxBrowser = ({ requestDebug, updateTxNumberFlag, unloadRequested, transactionNumber, debugging }) => {
   const [state, setState] = useState({
     txNumber: ''
   })
 
+  const inputValue = useRef(null)
   useEffect(() => {
     setState(prevState => {
       return {
@@ -41,16 +42,23 @@ export const TxBrowser = ({ requestDebug, unloadRequested, transactionNumber, de
     })
   }
 
+  const txInputOnInput = () => {
+    updateTxNumberFlag(!inputValue.current.value)
+    console.log("value is ", inputValue.current.value)
+  }
+
   return (
     <div className="container px-0">
       <div className="txContainer">
         <div className="py-1 d-flex justify-content-center w-100 input-group">
           <input
+            ref={inputValue}
             value={state.txNumber}
             className="form-control m-0 txinput"
             id='txinput'
             type='text'
             onChange={({ target: { value } }) => txInputChanged(value)}
+            onInput={txInputOnInput}
             placeholder={'Transaction hash, should start with 0x'}
             data-id="debuggerTransactionInput"
             disabled={debugging}

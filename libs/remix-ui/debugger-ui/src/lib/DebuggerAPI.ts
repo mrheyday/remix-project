@@ -61,4 +61,5 @@ export interface DebuggerAPI {
     getFile: (path: string) => string
     setFile: (path: string, content: string) => void
     getDebugWeb3: () => any // returns an instance of web3.js
+    showMessage: (title: string, message: string) => void
 } 
