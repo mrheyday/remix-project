@@ -1,4 +1,4 @@
-import { LibraryPlugin } from '@remixproject/engine'
+import { ViewPlugin } from '@remixproject/engine-web'
 import * as packageJson from '../../../../../package.json'
 
 const $ = require('jquery')
@@ -28,12 +28,13 @@ const profile = {
   version: packageJson.version,
   permission: true,
   events: ['newTransaction'],
-  methods: ['createVMAccount', 'sendTransaction', 'getAccounts', 'pendingTransactionsCount']
+  methods: ['createVMAccount', 'sendTransaction', 'getAccounts', 'pendingTransactionsCount', 'getSettings']
 }
 
-export class RunTab extends LibraryPlugin {
+export class RunTab extends ViewPlugin {
   constructor (blockchain, pluginUDapp, config, fileManager, editor, filePanel, compilersArtefacts, networkModule, mainView, fileProvider) {
-    super(pluginUDapp, profile)
+    super(profile)
+    this.pluginUDapp = pluginUDapp
     this.event = new EventManager()
     this.config = config
     this.blockchain = blockchain
@@ -44,6 +45,31 @@ export class RunTab extends LibraryPlugin {
     this.compilersArtefacts = compilersArtefacts
     this.networkModule = networkModule
     this.fileProvider = fileProvider
+    this.createVMAccount = this.pluginUDapp.createVMAccount
+    this.sendTransaction = this.pluginUDapp.sendTransaction
+    this.getAccounts = this.pluginUDapp.getAccounts
+    this.pendingTransactionsCount = this.pluginUDapp.pendingTransactionsCount
+    this.setupEvents()
+  }
+
+  setupEvents () {
+    this.blockchain.events.on('newTransaction', (tx, receipt) => {
+      this.emit('newTransaction', tx, receipt)
+    })
+  }
+
+  getSettings () {
+    return new Promise((resolve, reject) => {
+      if (!this.container) reject(new Error('UI not ready'))
+      else {
+        resolve({
+          selectedAccount: this.container.querySelector('#txorigin').selectedOptions[0].value,
+          selectedEnvMode: this.container.querySelector('#selectExEnvOptions').selectedOptions[0].value,
+          networkEnvironment: this.container.querySelector('*[data-id="settingsNetworkEnv"]').textContent
+        }
+        )
+      }
+    })
   }
 
   renderContainer () {
